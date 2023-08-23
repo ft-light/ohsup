@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import bcrypt from 'bcrypt';
+import express from 'express';
 import User from '../models/user.js';
 
+const router = express.Router();
 const saltRounds = 10;
 
-const register = async (req, res) => {
+router.post('/register', async (req, res) => {
 	const data = _.pick(req.body, ['username', 'password']);
 	const isExist = await User.exists({ username: data.username });
 
@@ -14,9 +16,9 @@ const register = async (req, res) => {
 	await User.create(data);
 
   res.status(201).end();
-}
+});
 
-const auth = async (req, res) => {
+router.post('/auth', async (req, res) => {
 	const { username, password } = req.body;
 	const user = await User.findOne({ username });
 	if (!user) return res.status(400).send('Invalid credentials!');
@@ -27,6 +29,6 @@ const auth = async (req, res) => {
 	const token = user.generateAuthToken();
 	
 	res.status(200).send({ token });
-}
+});
 
-export { register, auth }
+export default router;
